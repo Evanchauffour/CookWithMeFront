@@ -10,16 +10,18 @@ import { z } from 'zod';
 import Link from 'next/link';
 
 const signupSchema = z.object({
-  name: z.string().min(1, "Le nom est requis."), 
+  lastName: z.string().min(1, "Le nom est requis."), 
+  firstName: z.string().min(1, "Le prénom est requis."),
   email: z.string().email("L'email est requis et doit être valide."),
   password: z.string().min(1, "Le mot de passe est requis."),
 });
 
 export default function SignupForm() {
-    const [name, setName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [firstName, setFirstName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [errors, setErrors] = useState<{ email?: string; password?: string; name?: string }>({});
+    const [errors, setErrors] = useState<{ email?: string; password?: string; lastName?: string; firstName?: string }>({});
     const [serverError, setServerError] = useState<string | null>(null);
     const router = useRouter();
 
@@ -30,9 +32,9 @@ export default function SignupForm() {
         setServerError(null);
 
         try {
-            signupSchema.parse({ name, email, password });
+            signupSchema.parse({ lastName, firstName, email, password });
 
-            await signup(name, email, password);
+            await signup(lastName, firstName, email, password);
             router.push('/');
         } catch (err: any) {
             if (err instanceof z.ZodError) {
@@ -57,15 +59,30 @@ export default function SignupForm() {
                     label='Nom'
                     type='text'
                     placeholder='Nom'
-                    id='name'
-                    name='name'
-                    value={name}
-                    onChange={setName}
+                    id='lastName'
+                    name='lastName'
+                    value={lastName}
+                    onChange={setLastName}
                 />
-                {errors.email && (
+                {errors.lastName && (
                     <p className='text-red-500 flex gap-2 items-center text-sm'>
                         <IoIosWarning />
-                        {errors.name}
+                        {errors.lastName}
+                    </p>
+                )}
+                <Input
+                    label='Nom'
+                    type='text'
+                    placeholder='Nom'
+                    id='firstName'
+                    name='firstName'
+                    value={firstName}
+                    onChange={setFirstName}
+                />
+                {errors.firstName && (
+                    <p className='text-red-500 flex gap-2 items-center text-sm'>
+                        <IoIosWarning />
+                        {errors.firstName}
                     </p>
                 )}
                 <Input

@@ -8,6 +8,7 @@ import Button from '../ui/Button';
 import { IoIosWarning } from 'react-icons/io';
 import { z } from 'zod';
 import Link from 'next/link';
+import { useUserSession } from '@/hook/useUserSession';
 
 const loginSchema = z.object({
   email: z.string().email("L'email est requis et doit être valide."),
@@ -19,6 +20,7 @@ export default function LoginForm() {
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
     const [serverError, setServerError] = useState<string | null>(null);
+    const { refreshUser } = useUserSession();
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -31,6 +33,7 @@ export default function LoginForm() {
             loginSchema.parse({ email, password });
 
             await login(email, password);
+            await refreshUser();
             router.push('/');
         } catch (err: any) {
             if (err instanceof z.ZodError) {

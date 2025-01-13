@@ -26,14 +26,14 @@ export async function login(email: string, password: string) {
   }
 }
 
-export async function signup(name: string, email: string, password: string) {
+export async function signup(lastName: string, firstName: string, email: string, password: string) {
   try {
       const response = await fetch('/api/signup', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name, email, password }),
+          body: JSON.stringify({ lastName, firstName, email, password }),
       });
 
       if (!response.ok) {
@@ -55,13 +55,19 @@ export async function signup(name: string, email: string, password: string) {
 }
 
 export async function logout() {
-  const response = await fetch('/api/logout', {
+  try {
+    const response = await fetch('/api/logout', {
       method: 'POST',
-  });
+      credentials: 'include',
+    });
 
-  if (!response.ok) {
-      throw new Error('Failed to logout');
+    if (!response.ok) {
+      throw new Error("Erreur lors de la déconnexion");
+    }
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
   }
-
-  return await response.json();
 }

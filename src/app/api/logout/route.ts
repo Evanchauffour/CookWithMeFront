@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function POST() {
-    const response = NextResponse.json({ message: 'Logout successful' });
-    response.cookies.set('token', '', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        path: '/',
-        maxAge: 0,
-    });
-
+  try {
+    const response = NextResponse.json({ message: "Déconnexion réussie" });
+    response.cookies.set("token", "", { expires: new Date(0) });
     return response;
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Erreur lors de la déconnexion" },
+      { status: 500 }
+    );
+  }
 }

@@ -18,7 +18,7 @@ export default function Button({
   return (
     <button
       type="submit"
-      className={`py-2 px-4 bg-primary-600 text-white rounded-md bg-black hover:opacity-80 ${disabled ? "cursor-not-allowed opacity-80 hover:opacity-80" : ""}${className}`}
+      className={`py-2 px-4 whitespace-nowrap bg-primary-600 text-white rounded-md bg-black hover:opacity-80 ${disabled ? "cursor-not-allowed opacity-80 hover:opacity-80" : ""}${className}`}
       onClick={click}
       disabled={disabled}
     >
