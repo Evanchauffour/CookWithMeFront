@@ -24,7 +24,6 @@ export async function login(email: string, password: string): Promise<string> {
           }
       }
 
-      // Lire le JSON uniquement si ce n'est pas un 204
       const { message } = await response.json();
       return message || 'Connexion réussie';
   } catch (error: any) {
@@ -34,7 +33,7 @@ export async function login(email: string, password: string): Promise<string> {
 
 export async function signup(lastName: string, firstName: string, email: string, password: string) {
   try {
-      const response = await fetch('http://127.0.0.1:8000/api/signup', {
+      const response = await fetch('http://localhost:8000/api/signup', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
@@ -42,8 +41,8 @@ export async function signup(lastName: string, firstName: string, email: string,
           body: JSON.stringify({ lastName, firstName, email, password }),
       });
 
-      if (response.status === 204) {
-        return 'Connexion réussie';
+      if (response.ok) {
+        return 'Inscription réussie';
       }
 
       if (!response.ok) {
@@ -64,9 +63,18 @@ export async function signup(lastName: string, firstName: string, email: string,
 
 export async function logout() {
   try {
-    const response = NextResponse.json({ message: "Déconnexion réussie" });
-    response.cookies.set("token", "", { expires: new Date(0) });
-    return response;
+    const response = await fetch(`http://localhost:8000/api/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || 'Failed to fetch categories');
+    }
+
+    return {
+      success: true,
+    }
   } catch (error) {
     return NextResponse.json(
       { message: "Erreur lors de la déconnexion" },
