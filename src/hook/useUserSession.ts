@@ -17,7 +17,7 @@ const fetcher = async (url: string) => {
 };
 
 export function useUserSession() {
-  const { data, error, mutate } = useSWR<User | null>('/api/user', fetcher, {
+  const { data, error, mutate } = useSWR<User | null>('http://localhost:8000/api/user', fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: true,
   });

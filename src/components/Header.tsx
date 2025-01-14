@@ -17,8 +17,8 @@ export default function Header() {
     const router = useRouter();
 
     const handleLogout = async () => {
-      const success = await logout();
-      if (success) {
+      const response = await logout();
+      if (response.success) {
         router.push('/login');
         await refreshUser();
         setIsHover(false);
