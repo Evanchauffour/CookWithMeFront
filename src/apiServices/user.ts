@@ -1,7 +1,6 @@
-// src/apiServices/user.ts
 const BASE_URL = 'http://localhost:8000/api';
 
-export async function getUser(token: string): Promise<any> {
+export async function getUser(token: string) {
     const response = await fetch(`${BASE_URL}/user`, {
         method: 'GET',
         headers: {

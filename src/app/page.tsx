@@ -3,7 +3,9 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { Autoplay } from 'swiper/modules';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getCategories } from '@/apiServices/categories';
+import { Category } from '@/types/types';
 
 const items = [
   { id: 1, title: 'Pizza au feu de bois', nbReviews: 8, nbLikes: 12 },
@@ -13,17 +15,23 @@ const items = [
   { id: 5, title: 'Pizza au feu de bois', nbReviews: 8, nbLikes: 12 },
 ];
 
-const categories = [
-  { id: 1, name: 'Apéritifs' },
-  { id: 2, name: 'Entrées' },
-  { id: 3, name: 'Plats' },
-  { id: 4, name: 'Desserts' },
-  { id: 5, name: 'Boissons' },
-];
-
 export default function Home() {
-
   const [filter, setFilter] = useState<number>(1);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const fetchCategories = async () => {
+    const response = await getCategories();
+    setCategories(response.member);
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  if(!categories) {
+    return <p>Loading...</p>
+  }
+
   return (
     <div className='w-full'>
       <div className='w-[800px] mx-auto flex flex-col gap-8'>

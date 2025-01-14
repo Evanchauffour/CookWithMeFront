@@ -1,3 +1,5 @@
-export interface Error {
-    message: string;
+export interface Category {
+    id: number;
+    name: string;
+    recipes: [];
 }
