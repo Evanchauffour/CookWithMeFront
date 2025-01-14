@@ -27,7 +27,7 @@ export default function Header() {
 
     return (
         <header className="w-full flex justify-between items-center px-12 py-6 gap-12 border-b">
-            <h1 className="text-2xl font-bold text-black">CookWithMe</h1>
+            <Link href='/'><h1 className="text-2xl font-bold text-black">CookWithMe</h1></Link>
             <div className="border px-4 py-2 rounded-full flex-1 focus-within:border-blue-500">
                 <input
                     type="text"

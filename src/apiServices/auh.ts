@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 export async function login(email: string, password: string): Promise<string> {
   try {
       const response = await fetch('http://localhost:8000/api/login_check', {
@@ -76,9 +74,6 @@ export async function logout() {
       success: true,
     }
   } catch (error) {
-    return NextResponse.json(
-      { message: "Erreur lors de la déconnexion" },
-      { status: 500 }
-    );
+      throw new Error(error.message || 'An error occurred');
   }
 }

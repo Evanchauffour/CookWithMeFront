@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+
 
 export async function getCategories() {
     try {
@@ -20,7 +20,5 @@ export async function getCategories() {
 
     } catch (error) {
         console.error('Erreur lors de la récupération des catégories :', error);
-
-        return NextResponse.json({ message: 'Erreur interne' }, { status: 500 });
     }
 }

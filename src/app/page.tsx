@@ -6,6 +6,7 @@ import { Autoplay } from "swiper/modules";
 import { useEffect, useState } from "react";
 import { getCategories } from "@/apiServices/categories";
 import { Category } from "@/types/types";
+import { getRecipesByCategory } from "@/apiServices/recipes";
 
 const items = [
   { id: 1, title: "Pizza au feu de bois", nbReviews: 8, nbLikes: 12 },
@@ -16,8 +17,9 @@ const items = [
 ];
 
 export default function Home() {
-  const [filter, setFilter] = useState<number>(1);
+  const [filter, setFilter] = useState<number>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,6 +31,7 @@ export default function Home() {
       
       if (response.success) {
         setCategories(response.data.member);
+        setFilter(response.data.member[0].id);
       } else {
         throw new Error("Structure de réponse inattendue");
       }
@@ -39,9 +42,34 @@ export default function Home() {
     }
   };
 
+  const fetchCategoryRecipes = async (categoryId: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getRecipesByCategory(categoryId);
+      
+      if (response.success) {
+        setRecipes(response.data.member);
+      } else {
+        throw new Error("Structure de réponse inattendue");
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if(filter) {
+      fetchCategoryRecipes(filter);
+    }
+  }, [filter]);
 
   if (loading) {
     return <p>Chargement des catégories...</p>;
@@ -95,13 +123,13 @@ export default function Home() {
             ))}
           </div>
           <div className="grid grid-cols-3 gap-4">
-            {items.map((item) => (
-              <div className="rounded-lg pb-4" key={item.id}>
+            {recipes.map((recipe) => (
+              <div className="rounded-lg pb-4" key={recipe.id}>
                 <div className="aspect-square bg-blue-200 rounded-lg"></div>
-                <h3 className="text-xl font-medium text-black">{item.title}</h3>
+                <h3 className="text-xl font-medium text-black">{recipe.name}</h3>
                 <div className="w-full flex items-center justify-between text-black">
-                  <p className="text-opacity-50 text-sm">{item.nbReviews} avis</p>
-                  <p className="text-opacity-50 text-sm">{item.nbLikes} ❤️</p>
+                  <p className="text-opacity-50 text-sm">{recipe.nbReviews} avis</p>
+                  <p className="text-opacity-50 text-sm">{recipe.nbLikes} ❤️</p>
                 </div>
               </div>
             ))}
