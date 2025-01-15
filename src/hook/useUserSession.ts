@@ -1,9 +1,7 @@
+import { User } from '@/types/types';
 import useSWR from 'swr';
 
-type User = {
-  firstName: string;
-  lastName: string;
-};
+
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, { credentials: 'include' });
