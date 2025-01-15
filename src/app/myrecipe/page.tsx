@@ -1,28 +1,29 @@
 "use client";
 
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from '../../components/Modal/Modal';
-import AddRecipe from '@/components/Icons/AddRecipe';
 import { useUserSession } from '@/hook/useUserSession';
 import { createRecipe, getRecipesByUser, updateRecipe } from '@/apiServices/recipes';
 import { Category } from '@/types/types';
 import { getCategories } from '@/apiServices/categories';
+import RecipeItem from '@/components/RecipeItem';
 
 type Step = {
-    recipe?: Recipe; // Ajoutez cette ligne
+    recipe?: Recipe;
     number: string;
     title: string;
     content: string;
 };
 
 type Recipe = {
-    id?: string; // Ajoutez l'ID de la recette ici
+    id?: string;
     name: string;
     author: string;
     nbLikes: number;
     category: string;
     steps: Step[];
     createdAt: string;
+    nbReviews?: number;
 };
 
 const HomePage: React.FC = () => {
@@ -35,22 +36,21 @@ const HomePage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [name, setName] = useState('');
-    const [author, setAuthorId] = useState('');
     const [nbLikes, setNbLikes] = useState(0);
     const [categoryId, setCategoryId] = useState('');
     const [steps, setSteps] = useState<Step[]>([{ number: "1", title: '', content: '' }]);
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
-    const openModif = (recipe: Recipe) => {
+    const openModif = (e: React.MouseEvent<HTMLButtonElement>, recipe: Recipe) => {
+        e.preventDefault();
         setName(recipe.name);
         setCategoryId(recipe.category.replace('/api/categories/', ''));
         setSteps(recipe.steps.map(step => ({
             ...step,
-            recipe: recipe, // Ajoutez l'ID de la recette dans chaque étape
+            recipe: recipe,
         }))); setNbLikes(recipe.nbLikes);
-        setAuthorId(recipe.author.replace('/api/users/', ''));
-        setEditingRecipeId(recipe.id ?? null);  // Assurez-vous que l'ID de la recette est défini ici
+        setEditingRecipeId(recipe.id ?? null);
         setIsEditing(true);
         setIsModalOpen(true);
     };
@@ -101,7 +101,6 @@ const HomePage: React.FC = () => {
 
             // Réinitialisation des champs et fermeture du modal
             setName('');
-            setAuthorId('');
             setNbLikes(0);
             setCategoryId('');
             setSteps([{ number: '1', title: '', content: '' }]);
@@ -120,29 +119,19 @@ const HomePage: React.FC = () => {
             console.log(user)
             const response = await getRecipesByUser(user?.id || 0);
             console.log(response)
-            setRecipes(response.data.member);
+            setRecipes(response?.data.member);
 
         } catch (error) {
             console.error('Erreur lors de la récupération des recettes :', error);
         }
     }
-    const UpdateRecipe = async (recipe) => {
-        try {
-            console.log(user)
-            const response = await updateRecipe(recipe);
-            console.log(response)
-            setRecipes(response.data.member);
 
-        } catch (error) {
-            console.error('Erreur lors de la récupération des recettes :', error);
-        }
-    }
     const categoriesGet = async () => {
         try {
             console.log(user)
             const response = await getCategories();
             console.log(response)
-            setCategories(response.data.member);
+            setCategories(response?.data.member);
 
         } catch (error) {
             console.error('Erreur lors de la récupération des recettes :', error);
@@ -155,13 +144,14 @@ const HomePage: React.FC = () => {
         categoriesGet()
 
     }, [user]);
+
     return (
         <div className="w-full">
             <div className="w-[800px] mx-auto flex flex-col gap-8">
                 <section className="w-full flex justify-between">
                     <h2 className="text-2xl font-bold mb-2 text-black">Mes recettes</h2>
                     <button onClick={openModal} style={buttonStyle} className="bg-blue-500 text-white flex">
-                        <AddRecipe /> &nbsp; Ajouter une recette
+                        Ajouter une recette
                     </button>
                     <Modal isOpen={isModalOpen} onClose={closeModal}>
                         <h2 className="text-2xl font-bold mb-4 text-black">Ajouter une recette</h2>
@@ -196,7 +186,7 @@ const HomePage: React.FC = () => {
                                 {steps.map((step, index) => (
                                     <div key={index} className="mb-4 border p-4 rounded">
                                         <div className="mb-2">
-                                            <label className="block font-bold">Titre de l'étape {index + 1}</label>
+                                            <label className="block font-bold">Titre de l&apos;étape {index + 1}</label>
                                             <input
                                                 type="text"
                                                 value={step.title}
@@ -206,7 +196,7 @@ const HomePage: React.FC = () => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block font-bold">Contenu de l'étape {index + 1}</label>
+                                            <label className="block font-bold">Contenu de l&apos;étape {index + 1}</label>
                                             <textarea
                                                 value={step.content}
                                                 onChange={(e) => handleStepChange(index, 'content', e.target.value)}
@@ -220,7 +210,7 @@ const HomePage: React.FC = () => {
                                             onClick={() => handleRemoveStep(index)}
                                             className="bg-red-500 text-white p-2 rounded mt-2"
                                         >
-                                            Supprimer l'étape
+                                            Supprimer l&apos;étape
                                         </button>
                                     </div>
                                 ))}
@@ -263,19 +253,13 @@ const HomePage: React.FC = () => {
                     </Modal>
                 </section>
                 <section>
-                    <div className="grid grid-cols-3 gap-4">
+                    <ul className="grid grid-cols-3 gap-4">
                         {recipes.map((recipe) => (
-                            <div className="rounded-lg pb-4" key={recipe.id}>
-                                <div className="aspect-square bg-blue-200 rounded-lg"></div>
-                                <h3 className="text-xl font-medium text-black">{recipe.name}</h3>
-                                <div className="w-full flex items-center justify-between text-black">
-                                    <p className="text-opacity-50 text-sm">{recipe.nbReviews} avis</p>
-                                    <p className="text-opacity-50 text-sm">{recipe.nbLikes} ❤️</p>
-                                    <button className='p-2 bg-green-600 rounded text-white' onClick={() => openModif(recipe)}>Modifier</button>
-                                </div>
-                            </div>
+                            <li key={recipe.id}>                            
+                                <RecipeItem recipe={recipe} index={0} isEdition openEditModal={(e) => openModif(e, recipe)}/>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 </section>
             </div>
         </div>

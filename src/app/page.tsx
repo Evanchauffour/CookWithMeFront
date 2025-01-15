@@ -6,22 +6,19 @@ import { Autoplay } from "swiper/modules";
 import { useEffect, useState } from "react";
 import { getCategories } from "@/apiServices/categories";
 import { Category } from "@/types/types";
-import { getRecipesByCategory } from "@/apiServices/recipes";
-
-const items = [
-  { id: 1, title: "Pizza au feu de bois", nbReviews: 8, nbLikes: 12 },
-  { id: 2, title: "Pizza au feu de bois", nbReviews: 8, nbLikes: 12 },
-  { id: 3, title: "Pizza au feu de bois", nbReviews: 8, nbLikes: 12 },
-  { id: 4, title: "Pizza au feu de bois", nbReviews: 8, nbLikes: 12 },
-  { id: 5, title: "Pizza au feu de bois", nbReviews: 8, nbLikes: 12 },
-];
+import { getMostLikedRecipes, getRecipesByCategory } from "@/apiServices/recipes";
+import InfiniteScroll from "react-infinite-scroll-component";
+import RecipeItem from "@/components/RecipeItem";
 
 export default function Home() {
   const [filter, setFilter] = useState<number>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [recipes, setRecipes] = useState([]);
+  const [recipes, setRecipes] = useState<any[]>([]);
+  const [mostLikedRecipes, setMostLikedRecipes] = useState([]);
+  const [hasMore, setHasMore] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [pages, setPages] = useState(1);
 
   const fetchCategories = async () => {
     try {
@@ -29,7 +26,7 @@ export default function Home() {
       setError(null);
       const response = await getCategories();
       
-      if (response.success) {
+      if (response?.success) {
         setCategories(response.data.member);
         setFilter(response.data.member[0].id);
       } else {
@@ -46,10 +43,30 @@ export default function Home() {
     try {
       setLoading(true);
       setError(null);
-      const response = await getRecipesByCategory(categoryId);
+      const response = await getRecipesByCategory(categoryId, pages);
       
-      if (response.success) {
-        setRecipes(response.data.member);
+      if (response && response.success) {
+        setRecipes((prevRecipes) => [...prevRecipes, ...response.data.member]);
+        setPages((prevPages) => prevPages + 1);
+        setHasMore(response.data.member.length > 0);
+      } else {
+        throw new Error("Structure de réponse inattendue");
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
+    } finally {
+      setLoading(false);
+    }
+  };  
+
+  const fetchMostLikedRecipes = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getMostLikedRecipes();
+      
+      if (response?.success) {
+        setMostLikedRecipes(response.data);
       } else {
         throw new Error("Structure de réponse inattendue");
       }
@@ -60,20 +77,19 @@ export default function Home() {
     }
   }
 
-
   useEffect(() => {
+    fetchMostLikedRecipes();
     fetchCategories();
   }, []);
 
   useEffect(() => {
-    if(filter) {
+    if (filter) {
+      setPages(1);
+      setRecipes([]);
       fetchCategoryRecipes(filter);
     }
   }, [filter]);
-
-  if (loading) {
-    return <p>Chargement des catégories...</p>;
-  }
+  
 
   if (error) {
     return <p className="text-red-500">Erreur : {error}</p>;
@@ -92,16 +108,11 @@ export default function Home() {
               disableOnInteraction: true,
             }}
             modules={[Autoplay]}
-            key={items.length}
+            key={mostLikedRecipes.length}
           >
-            {items.map((item) => (
-              <SwiperSlide className="rounded-lg pb-4" key={item.id}>
-                <div className="aspect-square bg-blue-200 rounded-lg"></div>
-                <h3 className="text-xl font-medium text-black">{item.title}</h3>
-                <div className="w-full flex items-center justify-between text-black">
-                  <p className="text-opacity-50 text-sm">{item.nbReviews} avis</p>
-                  <p className="text-opacity-50 text-sm">{item.nbLikes} ❤️</p>
-                </div>
+            {mostLikedRecipes.map((item, index) => (
+              <SwiperSlide key={item.id}>
+                <RecipeItem recipe={item} index={index} />
               </SwiperSlide>
             ))}
           </Swiper>
@@ -122,17 +133,25 @@ export default function Home() {
               </button>
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            {recipes.map((recipe) => (
-              <div className="rounded-lg pb-4" key={recipe.id}>
-                <div className="aspect-square bg-blue-200 rounded-lg"></div>
-                <h3 className="text-xl font-medium text-black">{recipe.name}</h3>
-                <div className="w-full flex items-center justify-between text-black">
-                  <p className="text-opacity-50 text-sm">{recipe.nbReviews} avis</p>
-                  <p className="text-opacity-50 text-sm">{recipe.nbLikes} ❤️</p>
-                </div>
-              </div>
-            ))}
+          <div
+            id="scrollableDiv"
+            style={{
+              height: 600,
+              overflow: 'auto',
+            }}
+          >
+            <InfiniteScroll
+              className="grid grid-cols-3 gap-4"
+              dataLength={recipes.length}
+              next={() => fetchCategoryRecipes(filter)}
+              hasMore={hasMore}
+              loader={<h4>Loading...</h4>}
+              scrollableTarget="scrollableDiv"
+            >
+              {recipes.map((recipe, index) => (
+                <RecipeItem key={recipe.id} recipe={recipe} index={index} />
+              ))}
+            </InfiniteScroll>
           </div>
         </section>
       </div>

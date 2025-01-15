@@ -1,6 +1,6 @@
-export async function getRecipesByCategory(categoryId: number) {
+export async function getRecipesByCategory(categoryId: number, page: number) {
   try {
-      const response = await fetch(`http://localhost:8000/api/recipes?category=${categoryId}`, {
+      const response = await fetch(`http://localhost:8000/api/recipes?category=${categoryId}&page=${page}`, {
           credentials: 'include',
       });
 
@@ -43,6 +43,82 @@ export async function getRecipesByUser(userId: number) {
       console.error('Erreur lors de la récupération des recettes :', error);
   }
 }
+
+export async function getMostLikedRecipes() {
+  try {
+      const response = await fetch(`http://localhost:8000/api/top-liked-recipes`, {
+          credentials: 'include',
+      });
+
+      if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.message || (`Failed to fetch most liked recipes`));
+      }
+
+      const data = await response.json();
+
+      return {
+        success: true,
+        data: data
+      }
+
+  } catch (error) {
+      console.error('Erreur lors de la récupération des recettes :', error);
+  }
+}
+
+export async function searchRecipes(query: string, page: number = 1) {
+  try {
+      const response = await fetch(`http://localhost:8000/api/recipes?name=${query}&page=${page}`, {
+          credentials: 'include',
+      });
+
+      if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.message || (`Failed to search recipes with query ${query}`));
+      }
+
+      const data = await response.json();
+
+      return {
+        success: true,
+        data: data
+      }
+
+  } catch (error) {
+      console.error('Erreur lors de la récupération des recettes :', error);
+  }
+}
+
+export async function getRecipeById(recipeId: number, cookieHeader: string) {
+  
+  try {
+    const response = await fetch(`http://localhost:8000/api/recipes/${recipeId}`, {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${cookieHeader}`,
+      },
+    });
+    
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `Failed to get recipe with id ${recipeId}`);
+    }
+
+    const data = await response.json();
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    console.error('Erreur lors de la récupération de la recette :', error);
+    return { success: false, data: null };
+  }
+}
+
+
 export const createRecipe = async (recipeData: any) => {
   try {
       console.log('recipeData', recipeData);

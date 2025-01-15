@@ -33,6 +33,7 @@ export default function LoginForm() {
             loginSchema.parse({ email, password });
 
             await login(email, password);
+            refreshUser();
             router.push('/');
         } catch (err: any) {
             if (err instanceof z.ZodError) {
