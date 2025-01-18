@@ -36,6 +36,7 @@ export async function signup(lastName: string, firstName: string, email: string,
           headers: {
               'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({ lastName, firstName, email, password }),
       });
 

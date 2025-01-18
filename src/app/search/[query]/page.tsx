@@ -1,6 +1,7 @@
 "use client";
 
 import { searchRecipes } from '@/apiServices/recipes';
+import RecipeItem from '@/components/RecipeItem';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -55,14 +56,7 @@ export default function Page() {
           scrollableTarget="scrollableDiv"
         >
           {recipes.map((recipe, index) => (
-            <div className="rounded-lg pb-4 h-fit" key={`${recipe.id}-${index}`}>
-              <div className="aspect-square bg-blue-200 rounded-lg"></div>
-              <h3 className="text-xl font-medium text-black">{recipe.name}</h3>
-              <div className="w-full flex items-center justify-between text-black">
-                <p className="text-opacity-50 text-sm">{recipe.nbReviews} avis</p>
-                <p className="text-opacity-50 text-sm">{recipe.nbLikes} ❤️</p>
-              </div>
-            </div>
+            <RecipeItem key={recipe.id} recipe={recipe} index={index} />
           ))}
         </InfiniteScroll>
         {!hasMore && recipes.length > 0 && (

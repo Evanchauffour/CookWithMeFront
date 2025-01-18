@@ -8,6 +8,7 @@ import Button from '../ui/Button';
 import { IoIosWarning } from 'react-icons/io';
 import { z } from 'zod';
 import Link from 'next/link';
+import { useUserSession } from '@/hook/useUserSession';
 
 const signupSchema = z.object({
   lastName: z.string().min(1, "Le nom est requis."), 
@@ -24,6 +25,7 @@ export default function SignupForm() {
     const [errors, setErrors] = useState<{ email?: string; password?: string; lastName?: string; firstName?: string }>({});
     const [serverError, setServerError] = useState<string | null>(null);
     const router = useRouter();
+    const { refreshUser } = useUserSession();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -35,6 +37,7 @@ export default function SignupForm() {
             signupSchema.parse({ lastName, firstName, email, password });
 
             await signup(lastName, firstName, email, password);
+            await refreshUser();
             router.push('/');
         } catch (err: any) {
             if (err instanceof z.ZodError) {

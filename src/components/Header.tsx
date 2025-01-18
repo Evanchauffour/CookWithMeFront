@@ -50,7 +50,7 @@ export default function Header() {
                             <Link href='/myrecipe' className='flex items-center gap-2'><List className='size-4'/> Mes recettes</Link>
                           </li>                 
                           <li className='w-full py-2 px-4 hover:bg-blue-200 rounded-lg'>
-                          <Link href='/' className='flex items-center gap-2'><Like className='size-4'/> Mes likes</Link>
+                          <Link href='/mylikes' className='flex items-center gap-2'><Like className='size-4'/> Mes likes</Link>
                           </li>
                           </ul>
                           <Button label='Se déconnecter' click={() => handleLogout()}/>

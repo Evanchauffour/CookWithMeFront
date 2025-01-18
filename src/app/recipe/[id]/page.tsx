@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { getRecipeById } from '@/apiServices/recipes';
 import React from 'react';
+import LikeButton from '@/components/Recipe/LikeButton';
 
 export default async function Page({ params }: { params: { id: string } }) {
   const recipeId = (await params).id
@@ -16,7 +17,6 @@ export default async function Page({ params }: { params: { id: string } }) {
     } else {
       recipe = response.data; 
       console.log(recipe);
-      
     }
   
   } catch (error) {
@@ -34,13 +34,13 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   return (
     <div className="w-[600px] mx-auto mt-8">
-      <div className='flex flex-col gap-4'>
+      <div className='flex flex-col items-left gap-4'>
         <h1 className='text-4xl font-medium'>{recipe.name}</h1>
-        <div className='flex items-center justify-between'>
+        <div className='flex items-center justify-between w-full'>
           <p className="text-opacity-50 text-sm">{recipe.nbLikes} ❤️</p>
-          <p className="text-opacity-50 text-sm">{recipe.reviews.length} avis</p>
         </div>
         <div className='aspect-square bg-blue-200 w-full rounded-lg'></div>
+        <LikeButton recipeId={recipe.id} isLiked={recipe.isLikedByCurrentUser}/>
         <ul className='flex flex-col gap-6'>
           {recipe.steps.map((step) => (
             <li key={step.id} className='flex flex-col'>

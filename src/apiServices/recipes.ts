@@ -1,8 +1,14 @@
 export async function getRecipesByCategory(categoryId: number, page: number) {
   try {
-      const response = await fetch(`http://localhost:8000/api/recipes?category=${categoryId}&page=${page}`, {
+      const response = await fetch(`http://localhost:8000/api/recipes?page=${page}&category=${categoryId}`, {
           credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+        },
       });
+
+      console.log('response', response);
+      
 
       if (!response.ok) {
           const errorData = await response.json().catch(() => null);
@@ -99,6 +105,8 @@ export async function getRecipeById(recipeId: number, cookieHeader: string) {
         Authorization: `Bearer ${cookieHeader}`,
       },
     });
+    
+    console.log('response', response);
     
 
     if (!response.ok) {
