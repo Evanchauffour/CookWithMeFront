@@ -11,24 +11,45 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import RecipeItem from "@/components/RecipeItem";
 
 export default function Home() {
-  const [filter, setFilter] = useState<number>(null);
+  const [filter, setFilter] = useState<number | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [recipes, setRecipes] = useState<any[]>([]);
   const [mostLikedRecipes, setMostLikedRecipes] = useState([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [pages, setPages] = useState(1);
+  const [page, setPage] = useState<number>(1);
 
+  // Fetch categories
   const fetchCategories = async () => {
+    try {
+      setError(null);
+      const response = await getCategories();
+      if (response?.success) {
+        setCategories(response.data.member);
+        setFilter(response.data.member[0]?.id || null);
+      } else {
+        throw new Error("Structure de réponse inattendue");
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
+    }
+  };
+
+  // Fetch recipes by category with pagination
+  const fetchCategoryRecipes = async () => {
+    if (!filter) return;
+
     try {
       setLoading(true);
       setError(null);
-      const response = await getCategories();
-      
+
+      const response = await getRecipesByCategory(filter, page);
       if (response?.success) {
-        setCategories(response.data.member);
-        setFilter(response.data.member[0].id);
+        const newRecipes = response.data.member;
+
+        setRecipes((prevRecipes) => [...prevRecipes, ...newRecipes]);
+        setHasMore(newRecipes.length > 0); // Stop if no more recipes
       } else {
         throw new Error("Structure de réponse inattendue");
       }
@@ -39,32 +60,11 @@ export default function Home() {
     }
   };
 
-  const fetchCategoryRecipes = async (categoryId: number) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await getRecipesByCategory(categoryId, pages);
-      
-      if (response && response.success) {
-        setRecipes((prevRecipes) => [...prevRecipes, ...response.data.member]);
-        setPages((prevPages) => prevPages + 1);
-        setHasMore(response.data.member.length > 0);
-      } else {
-        throw new Error("Structure de réponse inattendue");
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue");
-    } finally {
-      setLoading(false);
-    }
-  };  
-
+  // Fetch most liked recipes
   const fetchMostLikedRecipes = async () => {
     try {
-      setLoading(true);
       setError(null);
       const response = await getMostLikedRecipes();
-      
       if (response?.success) {
         setMostLikedRecipes(response.data);
       } else {
@@ -72,24 +72,28 @@ export default function Home() {
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue");
-    } finally {
-      setLoading(false);
     }
-  }
+  };
 
+  // Initialize categories and most liked recipes
   useEffect(() => {
     fetchMostLikedRecipes();
     fetchCategories();
   }, []);
 
+  // Reset recipes and page on category change
   useEffect(() => {
-    if (filter) {
-      setPages(1);
+    if (filter !== null) {
       setRecipes([]);
-      fetchCategoryRecipes(filter);
+      setPage(1);
+      setHasMore(true);
+      fetchCategoryRecipes();
     }
   }, [filter]);
-  
+
+  useEffect(() => {
+    fetchCategoryRecipes();
+  }, [page]);
 
   if (error) {
     return <p className="text-red-500">Erreur : {error}</p>;
@@ -98,6 +102,7 @@ export default function Home() {
   return (
     <div className="w-full">
       <div className="w-[800px] mx-auto flex flex-col gap-8">
+        {/* Section: Most Liked Recipes */}
         <section className="w-full">
           <h2 className="text-2xl font-bold mb-2 text-black">Les plus populaires</h2>
           <Swiper
@@ -118,6 +123,7 @@ export default function Home() {
           </Swiper>
         </section>
 
+        {/* Section: Categories and Infinite Scroll */}
         <section className="w-full">
           <h2 className="text-2xl font-bold mb-2 text-black">Explorez nos catégories</h2>
           <div className="flex gap-3 flex-wrap mb-4">
@@ -137,15 +143,15 @@ export default function Home() {
             id="scrollableDiv"
             style={{
               height: 600,
-              overflow: 'auto',
+              overflow: "auto",
             }}
           >
             <InfiniteScroll
               className="grid grid-cols-3 gap-4"
               dataLength={recipes.length}
-              next={() => fetchCategoryRecipes(filter)}
+              next={() => setPage((prevPage) => prevPage + 1)}
               hasMore={hasMore}
-              loader={<h4>Loading...</h4>}
+              loader={<h4>Chargement...</h4>}
               scrollableTarget="scrollableDiv"
             >
               {recipes.map((recipe, index) => (

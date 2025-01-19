@@ -1,1 +1,1 @@
-export const protectedRoutes = ['/myrecipes', '/mylikes'];
+export const protectedRoutes = ['/myrecipe', '/mylikes'];
