@@ -36,6 +36,7 @@ export async function signup(lastName: string, firstName: string, email: string,
           headers: {
               'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({ lastName, firstName, email, password }),
       });
 
@@ -61,13 +62,12 @@ export async function signup(lastName: string, firstName: string, email: string,
 
 export async function logout() {
   try {
-    const response = await fetch(`http://localhost:8000/api/logout`, {
+    const response = await fetch(`/api/logout`, {
       method: 'POST',
-      credentials: 'include',
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || 'Failed to fetch categories');
+      throw new Error(errorData?.message || 'Failed to logout');
     }
 
     return {

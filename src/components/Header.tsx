@@ -10,6 +10,7 @@ import Like from './Icons/Like';
 import { logout } from '@/apiServices/auh';
 import { useRouter } from 'next/navigation';
 import User from './Icons/User';
+import SearchBar from './SearchBar/SearchBar';
 
 export default function Header() {
     const { user, isLoading, refreshUser } = useUserSession();
@@ -28,13 +29,7 @@ export default function Header() {
     return (
         <header className="w-full flex justify-between items-center px-12 py-6 gap-12 border-b">
             <Link href='/'><h1 className="text-2xl font-bold text-black">CookWithMe</h1></Link>
-            <div className="border px-4 py-2 rounded-full flex-1 focus-within:border-blue-500">
-                <input
-                    type="text"
-                    placeholder="Rechercher une recette"
-                    className="focus:outline-none text-black"
-                />
-            </div>
+              <SearchBar />
               <div className="flex items-center gap-1 text-black">
                 {isLoading ? 'Chargement...' : (
                 user ? (
@@ -52,10 +47,10 @@ export default function Header() {
                           <Link href='/' className='flex items-center gap-2'><User className='size-4'/> Mon profil</Link>
                           </li>
                           <li className='w-full py-2 px-4 hover:bg-blue-200 rounded-lg'>
-                            <Link href='/' className='flex items-center gap-2'><List className='size-4'/> Mes recettes</Link>
+                            <Link href='/myrecipe' className='flex items-center gap-2'><List className='size-4'/> Mes recettes</Link>
                           </li>                 
                           <li className='w-full py-2 px-4 hover:bg-blue-200 rounded-lg'>
-                          <Link href='/' className='flex items-center gap-2'><Like className='size-4'/> Mes likes</Link>
+                          <Link href='/mylikes' className='flex items-center gap-2'><Like className='size-4'/> Mes likes</Link>
                           </li>
                           </ul>
                           <Button label='Se déconnecter' click={() => handleLogout()}/>
