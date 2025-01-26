@@ -10,30 +10,44 @@ export default function Page() {
   const params = useParams<{ query: string }>();
   const [recipes, setRecipes] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [pages, setPages] = useState(1);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
 
-  const handleSearch = async (query: string) => {
+  const fetchRecipes = async (query: string, page: number, isNewSearch: boolean = false) => {
     try {
-      const response = await searchRecipes(query, pages);
-      if (response && response.success && response.data.member.length > 0) {
-        setRecipes((prevRecipes) => [...prevRecipes, ...response.data.member]);
-        setPages((prevPages) => prevPages + 1);
-        setHasMore(response.data.member.length > 0);
+      setLoading(true);
+
+      const response = await searchRecipes(query, page);
+      if (response?.success) {
+        const newRecipes = response.data.member;
+
+        setRecipes((prevRecipes) =>
+          isNewSearch ? newRecipes : [...prevRecipes, ...newRecipes]
+        );
+        setHasMore(newRecipes.length > 0);
       } else {
         setHasMore(false);
       }
     } catch (error) {
       console.error('Erreur lors de la récupération des recettes :', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     if (params.query) {
-      setPages(1);
-      setRecipes([]);
-      handleSearch(params.query);
+      setPage(1);
+      setHasMore(true);
+      fetchRecipes(params.query, 1, true);
     }
   }, [params.query]);
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchRecipes(params.query, page);
+    }
+  }, [page]);
 
   return (
     <section className="w-[800px] mx-auto mt-8">
@@ -50,7 +64,7 @@ export default function Page() {
         <InfiniteScroll
           className="grid grid-cols-3 gap-4"
           dataLength={recipes.length}
-          next={() => handleSearch(params.query)}
+          next={() => setPage((prevPage) => prevPage + 1)}
           hasMore={hasMore}
           loader={<div className="text-center">Chargement...</div>}
           scrollableTarget="scrollableDiv"
@@ -59,9 +73,17 @@ export default function Page() {
             <RecipeItem key={recipe.id} recipe={recipe} index={index} />
           ))}
         </InfiniteScroll>
+        {loading && (
+          <p className="text-center text-gray-500 mt-4">Chargement des recettes...</p>
+        )}
         {!hasMore && recipes.length > 0 && (
           <p className="text-center text-gray-500 mt-4">
             Toutes les recettes ont été chargées.
+          </p>
+        )}
+        {!loading && recipes.length === 0 && (
+          <p className="text-center text-gray-500 mt-4">
+            Aucune recette trouvée pour cette recherche.
           </p>
         )}
       </div>

@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { getRecipeById } from '@/apiServices/recipes';
 import React from 'react';
 import LikeButton from '@/components/Recipe/LikeButton';
+import ImgSlider from '@/components/Recipe/ImgSlider';
 
 export default async function Page({ params }: { params: { id: string } }) {
   const recipeId = (await params).id
@@ -39,7 +40,9 @@ export default async function Page({ params }: { params: { id: string } }) {
         <div className='flex items-center justify-between w-full'>
           <p className="text-opacity-50 text-sm">{recipe.nbLikes} ❤️</p>
         </div>
-        <div className='aspect-square bg-blue-200 w-full rounded-lg'></div>
+        <div className='aspect-square w-full rounded-lg overflow-hidden'>
+          <ImgSlider recipe={recipe}/>
+        </div>
         <LikeButton recipeId={recipe.id} isLiked={recipe.isLikedByCurrentUser}/>
         <ul className='flex flex-col gap-6'>
           {recipe.steps.map((step) => (

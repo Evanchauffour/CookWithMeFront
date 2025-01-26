@@ -64,6 +64,19 @@ const HomePage: React.FC = () => {
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
+    const openModif = (e: React.MouseEvent<HTMLButtonElement>, recipe: Recipe) => {
+        e.preventDefault();
+        setName(recipe.name);
+        setCategoryId(recipe.category.id);
+        setSteps(recipe.steps.map(step => ({
+            ...step,
+            recipe: recipe,
+        }))); setNbLikes(recipe.nbLikes);
+        setEditingRecipeId(recipe.id ?? null);
+        setIsEditing(true);
+        setIsModalOpen(true);
+    };
+
 
     const handleAddStep = () => {
         setSteps([...steps, { number: String(steps.length + 1), title: "", content: "" }]);
@@ -240,8 +253,8 @@ const HomePage: React.FC = () => {
         <div className="w-full">
             <div className="w-[800px] mx-auto flex flex-col gap-8">
                 <section className="w-full flex justify-between">
-                    <h2 className="text-2xl font-bold mb-2 text-black">Mes recettes</h2>
-                    <button onClick={(e) => { setIsEditing(false); resetModal(); openModal() }} style={buttonStyle} className="bg-blue-500 text-white flex">
+                    <h1 className='text-2xl font-medium'>Mes recettes</h1>
+                    <button onClick={openModal} style={buttonStyle} className="bg-blue-500 text-white flex">
                         Ajouter une recette
                     </button>
                     <Modal isOpen={isModalOpen} onClose={closeModal}>
