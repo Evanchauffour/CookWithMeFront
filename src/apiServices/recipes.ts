@@ -39,6 +39,7 @@ export async function getRecipesByUser(userId: number) {
         }
 
         const data = await response.json();
+        console.log(data)
 
         return {
             success: true,
@@ -146,7 +147,56 @@ export const createRecipe = async (recipeData: any) => {
         }
 
         const responseData = await response.json();
+        return responseData['@id']; // Retourne les données de la recette créée
+    } catch (error) {
+        console.error('Erreur lors de la création de la recette :', error);
+        throw error;
+    }
+};
+export const createRecipeIngredient = async (recipeData: any) => {
+    try {
+        console.log('recipeData', recipeData);
+        const response = await fetch('http://localhost:8000/api/recipe_ingredients', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/ld+json',
+            },
+            body: JSON.stringify(recipeData),
+            credentials: 'include',
+
+        });
+
+        // Vérifier si la réponse est OK (status 200-299)
+        if (!response.ok) {
+            throw new Error(`Erreur lors de la création de la recette: ${response.statusText}`);
+        }
+
+        const responseData = await response.json();
         return responseData; // Retourne les données de la recette créée
+    } catch (error) {
+        console.error('Erreur lors de la création de la recette :', error);
+        throw error;
+    }
+};
+export const getRecipeIngredientByRecipe = async (recipeData: any) => {
+    try {
+        console.log('recipeData', recipeData);
+        const response = await fetch(`http://localhost:8000/api/recipe_ingredients?recipe=${recipeData.id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/ld+json',
+            },
+            credentials: 'include',
+
+        });
+
+        // Vérifier si la réponse est OK (status 200-299)
+        if (!response.ok) {
+            throw new Error(`Erreur lors de la création de la recette: ${response.statusText}`);
+        }
+
+        const responseData = await response.json();
+        return responseData.member; // Retourne les données de la recette créée
     } catch (error) {
         console.error('Erreur lors de la création de la recette :', error);
         throw error;
@@ -177,3 +227,28 @@ export const updateRecipe = async (recipeData: any) => {
         throw error;
     }
 };
+export const deleteRecipeIngredient = async (id: any) => {
+    try {
+        console.log('id recipe', id);
+        const response = await fetch(`http://localhost:8000/api/recipe_ingredients?recipe=${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/ld+json',
+            },
+            credentials: 'include',
+
+        });
+
+        // Vérifier si la réponse est OK (status 200-299)
+        if (!response.ok) {
+            throw new Error(`Erreur lors de la création de la recette: ${response.statusText}`);
+        }
+
+        const responseData = await response.json();
+        return responseData.member; // Retourne les données de la recette créée
+    } catch (error) {
+        console.error('Erreur lors de la création de la recette :', error);
+        throw error;
+    }
+};
+
