@@ -9,7 +9,8 @@ import {
     getRecipesByUser,
     updateRecipe,
     getRecipeIngredientByRecipe,
-    deleteRecipeIngredient
+    deleteRecipeIngredient,
+    createRecipeImage
 } from "@/apiServices/recipes";
 import { Category } from "@/types/types";
 import { getCategories } from "@/apiServices/categories";
@@ -51,6 +52,7 @@ const HomePage: React.FC = () => {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
 
     const [isEditing, setIsEditing] = useState(false);
     const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
@@ -149,7 +151,14 @@ const HomePage: React.FC = () => {
                     };
                     return createRecipeIngredient(recipeIngredientFormatted);
                 });
-                await Promise.all(promiseRecipeIngredient);
+                const promiseAddImageRecipe = imageFiles.map((image) => {
+                    const imageFormatted = {
+                        recipe: `${recipeId}`,
+                        file: image,
+                    };
+                    return createRecipeImage(imageFormatted);
+                });
+                await Promise.all(promiseAddImageRecipe);
                 console.log("Nouvelle recette créée avec succès");
             }
 
@@ -208,6 +217,11 @@ const HomePage: React.FC = () => {
         }
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setImageFiles(Array.from(e.target.files));
+        }
+    };
 
 
     const handleEditRecipe = (recipe: Recipe) => {
@@ -285,6 +299,11 @@ const HomePage: React.FC = () => {
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block font-bold">Images</label>
+                                <input type="file" onChange={handleFileChange} accept="image/*" multiple />
+
                             </div>
 
                             <div className="col-span-2">

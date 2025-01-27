@@ -251,4 +251,35 @@ export const deleteRecipeIngredient = async (id: any) => {
         throw error;
     }
 };
+export const createRecipeImage = async (image: any) => {
+    try {
+        console.log('recipeData', image);
+
+        // Crée un FormData pour envoyer les fichiers
+        const formData = new FormData();
+        formData.append('file', image.file); // Ajouter le fichier à envoyer
+        formData.append('recipe', `"${image.recipe}"`); // ID de la recette ou URL complète
+
+        // Effectuer la requête
+        const response = await fetch('http://localhost:8000/api/recipe_images', {
+            method: 'POST',
+            body: formData,  // Envoyer les données sous forme de FormData
+            credentials: 'include',
+            // Pas besoin de définir le Content-Type ici !
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erreur lors de la création de l'image de recette: ${response.statusText}`);
+        }
+
+        const responseData = await response.json();
+        return responseData;
+    } catch (error) {
+        console.error('Erreur lors de la création de l\'image de recette:', error);
+        throw error;
+    }
+};
+
+
+
 
