@@ -17,7 +17,6 @@ export default async function Page({ params }: { params: { id: string } }) {
       throw new Error('Erreur lors de la récupération de la recette');
     } else {
       recipe = response.data; 
-      console.log(recipe);
     }
   
   } catch (error) {
@@ -44,9 +43,17 @@ export default async function Page({ params }: { params: { id: string } }) {
           <ImgSlider recipe={recipe}/>
         </div>
         <LikeButton recipeId={recipe.id} isLiked={recipe.isLikedByCurrentUser}/>
+        <ul className='flex flex-wrap gap-4 items-center justify-center'>
+          {recipe.recipe_ingredient.map((ingredient) => (
+            <li key={ingredient.id} className='flex flex-col items-center rounded-lg bg-gray-100 p-4 w-fit min-w-32'>
+              <p className='text-center whitespace-nowrap'>{ingredient.quantity} {ingredient.unit}</p>
+              <p className='font-bold'>{ingredient.ingredient.name}</p>
+            </li>
+          ))}
+        </ul>
         <ul className='flex flex-col gap-6'>
           {recipe.steps.map((step) => (
-            <li key={step.id} className='flex flex-col'>
+            <li key={step.id} className='flex flex-col pt-4 border-t border-gray-600'>
               <h3 className='text-xl font-medium'>{step.title}</h3>
               <p className='text-base'>{step.content}</p>
             </li>

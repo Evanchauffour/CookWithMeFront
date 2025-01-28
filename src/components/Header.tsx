@@ -9,7 +9,6 @@ import Chevron from './Icons/Chevron';
 import Like from './Icons/Like';
 import { logout } from '@/apiServices/auh';
 import { useRouter } from 'next/navigation';
-import User from './Icons/User';
 import SearchBar from './SearchBar/SearchBar';
 
 export default function Header() {
@@ -43,9 +42,6 @@ export default function Header() {
                     <div className='absolute right-0 min-w-full w-[200px] pt-2 z-10'>
                       <div className='p-2 bg-white shadow-lg shadow-slate-400 rounded-lg flex flex-col'>
                         <ul className='text-black flex flex-col mb-2'> 
-                          <li className='w-full py-2 px-4 hover:bg-blue-200 rounded-lg'>
-                          <Link href='/' className='flex items-center gap-2'><User className='size-4'/> Mon profil</Link>
-                          </li>
                           <li className='w-full py-2 px-4 hover:bg-blue-200 rounded-lg'>
                             <Link href='/myrecipe' className='flex items-center gap-2'><List className='size-4'/> Mes recettes</Link>
                           </li>                 
