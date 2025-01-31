@@ -282,4 +282,24 @@ export const createRecipeImage = async (image: any) => {
 
 
 
+export const deleteRecipe = async (id: any) => {
+    try {
+        console.log('id recipe', id);
+        const response = await fetch(`http://localhost:8000/api/recipes/${id}`, {
+            method: 'DELETE',
+            credentials: 'include',
 
+        });
+
+
+        // Vérifier si la réponse est OK (status 200-299)
+        if (!response.ok) {
+            throw new Error(`Erreur lors de la création de la recette: ${response.statusText}`);
+        }
+
+        return { success: true }; // Retourne les données de la recette créée
+    } catch (error) {
+        console.error('Erreur lors de la création de la recette :', error);
+        throw error;
+    }
+};

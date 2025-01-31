@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Modal from "../../components/Modal/Modal";
+
 import { useUserSession } from "@/hook/useUserSession";
 import {
     createRecipe,
@@ -10,12 +11,13 @@ import {
     updateRecipe,
     getRecipeIngredientByRecipe,
     deleteRecipeIngredient,
-    createRecipeImage
+    createRecipeImage,
+    deleteRecipe
 } from "@/apiServices/recipes";
 import { Category } from "@/types/types";
 import { getCategories } from "@/apiServices/categories";
 import { getIngredients } from "@/apiServices/ingredients";
-import Select from "react-select";
+import LoadingSpinner from "@/components/loading/LoadingSpinner";
 
 type Step = {
     recipe?: Recipe;
@@ -53,6 +55,7 @@ const HomePage: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
     const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [isEditing, setIsEditing] = useState(false);
     const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
@@ -125,10 +128,13 @@ const HomePage: React.FC = () => {
 
         try {
             if (isEditing && editingRecipeId) {
+                setIsLoading(true); // Démarrer le chargement
+
                 const updatedRecipe = { ...newRecipe, id: editingRecipeId };
                 await updateRecipe(updatedRecipe);
                 await deleteRecipeIngredient(editingRecipeId);
                 console.log("Recette mise à jour avec succès");
+                setIsLoading(false); // Démarrer le chargement
                 const promiseRecipeIngredient = recipeIngredients.map((recipeIngredient) => {
                     const recipeIngredientFormatted = {
                         quantity: recipeIngredient.quantity,
@@ -141,6 +147,8 @@ const HomePage: React.FC = () => {
                 await Promise.all(promiseRecipeIngredient);
 
             } else {
+                setIsLoading(true); // Démarrer le chargement
+
                 const recipeId = await createRecipe(newRecipe);
                 const promiseRecipeIngredient = recipeIngredients.map((recipeIngredient) => {
                     const recipeIngredientFormatted = {
@@ -160,6 +168,8 @@ const HomePage: React.FC = () => {
                 });
                 await Promise.all(promiseAddImageRecipe);
                 console.log("Nouvelle recette créée avec succès");
+                setIsLoading(false); // Démarrer le chargement
+
             }
 
             setName("");
@@ -233,8 +243,13 @@ const HomePage: React.FC = () => {
 
     const getRecipeUser = async () => {
         try {
+            setIsLoading(true); // Démarrer le chargement
+
             const response = await getRecipesByUser(user?.id || 0);
+
             setRecipes(response?.data.member);
+            setIsLoading(false); // Démarrer le chargement
+
         } catch (error) {
             console.error("Erreur lors de la récupération des recettes :", error);
         }
@@ -264,8 +279,15 @@ const HomePage: React.FC = () => {
         ingredientsGet();
     }, [user]);
     return (
-        <div className="w-full">
+        <div className="">
+            {isLoading && (
+                <div className="absolute inset-0 bg-gray-200 bg-opacity-50 flex justify-center items-center z-50">
+                    <LoadingSpinner />
+                </div>
+            )}
+
             <div className="w-[800px] mx-auto flex flex-col gap-8">
+
                 <section className="w-full flex justify-between">
                     <h1 className='text-2xl font-medium'>Mes recettes</h1>
                     <button onClick={openModal} style={buttonStyle} className="bg-blue-500 text-white flex">
@@ -445,7 +467,6 @@ const HomePage: React.FC = () => {
                                 <div className="aspect-square bg-blue-200 rounded-lg"></div>
                                 <h3 className="text-xl font-medium text-black">{recipe.name}</h3>
                                 <div className="w-full flex items-center justify-between text-black">
-                                    <p className="text-opacity-50 text-sm">{recipe.nbLikes} ❤️</p>
                                     <button
                                         className="p-2 bg-green-600 rounded text-white"
                                         onClick={(e) => {
@@ -457,6 +478,27 @@ const HomePage: React.FC = () => {
                                     >
                                         Modifier
                                     </button>
+                                    <p className="text-opacity-50 text-sm">{recipe.nbLikes} ❤️</p>
+
+                                    <button
+                                        className="p-2 bg-red-600 rounded text-white"
+                                        onClick={async (e) => {
+                                            e.preventDefault();
+                                            setIsLoading(true); // Démarrer le chargement
+
+                                            try {
+                                                await deleteRecipe(recipe.id); // Supprime la recette
+                                                await getRecipeUser(); // Recharge la liste après suppression
+                                                setIsLoading(false); // Démarrer le chargement
+
+                                            } catch (error) {
+                                                console.error("Erreur lors de la suppression de la recette :", error);
+                                            }
+                                        }}
+                                    >
+                                        Supprimer
+                                    </button>
+
                                 </div>
                             </div>
                         ))}
